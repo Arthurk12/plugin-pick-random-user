@@ -22,6 +22,11 @@ const BOT_AUTO_CLOSE_TICK_MS = 30;
 const MODAL_TEST_ID = 'pickRandomUserModal';
 const CLOSE_BUTTON_DATA_TEST = `${MODAL_TEST_ID}-close-button`;
 
+// react-modal appends the portal to whatever this returns, with no null check of
+// its own, so fall back to its own default when the client has not rendered the
+// container — the plugin should not take the whole client down over a missing node.
+const getModalParent = () => document.querySelector<HTMLElement>('#modals-container') ?? document.body;
+
 const intlMessages = defineMessages({
   currentUserPicked: {
     id: 'pickRandomUserPlugin.modal.pickedUserView.title.currentUserPicked',
@@ -253,8 +258,8 @@ export function PickUserModal(props: PickUserModalProps) {
     <Styled.PluginModal
       overlayClassName="modalOverlay"
       portalClassName="modal-low"
-      appElement={modalAnchor.current}
-      parentSelector={() => document.querySelector('#modals-container')}
+      appElement={modalAnchor.current ?? undefined}
+      parentSelector={getModalParent}
       isOpen={showModal}
       onRequestClose={handleRequestClose}
       shouldCloseOnOverlayClick={canClose && !isBot}
